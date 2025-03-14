@@ -18,7 +18,13 @@
     "128": "icon-128.png"
   },
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "cookies",
+    "declarativeContent",
+    "scripting",
+    "storage",
+    "tabs",
+    "webRequest"
   ],
   "content_scripts": [
     {
