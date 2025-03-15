@@ -13,9 +13,23 @@ const ContentScript = () => {
 	console.log("ContentScript")
 	console.log("mode", mode)
 
-	function switchText() {
+	const analyzeText = async () => {
 		console.log("switchText")
 		console.log(window.getSelection().toString())
+
+		const message = window.getSelection().toString()
+
+		console.log("message", message)
+
+		const response = await axios.post('http://127.0.0.1:8080/api/v1/analyze_text', {
+			"text": message
+		})
+
+		console.log(response)
+
+		const data = response.data.response
+
+		console.log("data", data)
 
 		// Gets the selection range
 		// This is from Tim Down, linked below
@@ -31,52 +45,32 @@ const ContentScript = () => {
 			sel.addRange(range);
 		}
 
-		const data = [
-			{
-				"text": "Привет, ",
-				"state": 0
-			},
-			{
-				"text": "вы все говно. ",
-				"state": 1
-			},
-			{
-				"text": "Пушкин плохо писал стихи.",
-				"state": 2
-			}
-		]
-
-
-		console.log(window.getSelection().toString())
-
-		// You can use either a variable or a string
-		const someNewText = window.getSelection().toString();
 
 		// This is from user YeppThatsMe, also linked below
 		// document.execCommand("insertHTML", false, `<span id='${uuid}' style="background: blue">`+ document.getSelection()+"</span>");
 		document.execCommand("insertHTML", false, ReactDOMServer.renderToStaticMarkup(
-			data.map(node => <TextNode text={node.text} state={node.state} ></TextNode>)));
+			data.map(node => <TextNode text={node.text} state={node.state} />)
+		));
 
 		document.designMode = "off";
-	}
-
-	const test = async (message) => {
-		console.log("message", message)
-		const response = await axios.post('http://127.0.0.1:8080/api/v1/analyze_text', {
-			"text": message
-		})
-		console.log(response.data)
 	}
 
 	useEffect(() => {
 		if (mode == Mode.fullPage) {
 			console.log("ASDFSDAFASDSAADFSFDSFSSFAD")
 			hotkeys.unbind('g');
+
+			// TODO
+			// axios.post('http://127.0.0.1:8080/api/v1/analyze_text', {
+			// 	"text": document.body.innerText
+			// })
+
 		} else {
+			console.log("hotkey")
 			hotkeys('g', (e) => {
 				e.preventDefault()
 
-				test(window.getSelection().toString())
+				analyzeText()
 			});
 		}
 	}, [mode]);
