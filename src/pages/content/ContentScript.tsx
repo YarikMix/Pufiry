@@ -1,16 +1,17 @@
 import useExtensionState from "@pages/hooks/useExtensionState";
 import {useEffect} from "react";
-import hotkeys from "hotkeys-js";
 import ReactDOMServer from "react-dom/server"
 import TextNode from "@pages/content/TextNode";
+import {Mode} from "@pages/state/extensionState";
+import hotkeys from "hotkeys-js";
 import axios from "axios";
 
 
 const ContentScript = () => {
-	const {color} = useExtensionState();
+	const {mode} = useExtensionState();
 
 	console.log("ContentScript")
-	console.log("color", color)
+	console.log("mode", mode)
 
 	function switchText() {
 		console.log("switchText")
@@ -57,23 +58,33 @@ const ContentScript = () => {
 			data.map(node => <TextNode text={node.text} state={node.state} ></TextNode>)));
 
 		document.designMode = "off";
-	};
+	}
+
+	const test = async (message) => {
+		console.log("message", message)
+		const response = await axios.post('http://127.0.0.1:8080/api/v1/analyze_text', {
+			"text": message
+		})
+		console.log(response.data)
+	}
 
 	useEffect(() => {
-		hotkeys('g', (e) => {
-			e.preventDefault()
+		if (mode == Mode.fullPage) {
+			console.log("ASDFSDAFASDSAADFSFDSFSSFAD")
+			hotkeys.unbind('g');
+		} else {
+			hotkeys('g', (e) => {
+				e.preventDefault()
 
-			// axios('https://jsonplaceholder.typicode.com/todos/1')
-			// 	.then(resp => console.log(resp.data))
-
-			switchText()
-		});
-	}, []);
+				test(window.getSelection().toString())
+			});
+		}
+	}, [mode]);
 
 	return (
 		<div>
 			AAASDFASDFASDFASDFASFDASDF
-			<div>{color}</div>
+			<div>{mode === Mode.fullPage ? "Меняем текст на всей странице" : "Меняем текст по хоткею"}</div>
 		</div>
 	)
 }

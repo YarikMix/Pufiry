@@ -5,8 +5,13 @@ export enum Actions {
   SET_STATE = "set-state",
 }
 
+export enum Mode {
+  fullPage,
+  selective
+}
+
 export const state = proxy({
-  color: "",
+  mode: Mode.selective,
 });
 
 export type ExtensionState = typeof state;
