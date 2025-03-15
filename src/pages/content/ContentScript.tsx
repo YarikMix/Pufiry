@@ -5,6 +5,7 @@ import ReactDOMServer from "react-dom/server"
 import TextNode from "@pages/content/TextNode";
 import axios from "axios";
 
+
 const ContentScript = () => {
 	const {color} = useExtensionState();
 
@@ -12,6 +13,9 @@ const ContentScript = () => {
 	console.log("color", color)
 
 	function switchText() {
+		console.log("switchText")
+		console.log(window.getSelection().toString())
+
 		// Gets the selection range
 		// This is from Tim Down, linked below
 		let range, sel = window.getSelection();
@@ -26,12 +30,31 @@ const ContentScript = () => {
 			sel.addRange(range);
 		}
 
+		const data = [
+			{
+				"text": "Привет, ",
+				"state": 0
+			},
+			{
+				"text": "вы все говно. ",
+				"state": 1
+			},
+			{
+				"text": "Пушкин плохо писал стихи.",
+				"state": 2
+			}
+		]
+
+
+		console.log(window.getSelection().toString())
+
 		// You can use either a variable or a string
-		const someNewText = "-- You can make this whatever you want --";
+		const someNewText = window.getSelection().toString();
 
 		// This is from user YeppThatsMe, also linked below
 		// document.execCommand("insertHTML", false, `<span id='${uuid}' style="background: blue">`+ document.getSelection()+"</span>");
-		document.execCommand("insertHTML", false, ReactDOMServer.renderToStaticMarkup(<TextNode text={someNewText}></TextNode>));
+		document.execCommand("insertHTML", false, ReactDOMServer.renderToStaticMarkup(
+			data.map(node => <TextNode text={node.text} state={node.state} ></TextNode>)));
 
 		document.designMode = "off";
 	};
@@ -40,8 +63,8 @@ const ContentScript = () => {
 		hotkeys('g', (e) => {
 			e.preventDefault()
 
-			axios('https://jsonplaceholder.typicode.com/todos/1')
-				.then(resp => console.log(resp.data))
+			// axios('https://jsonplaceholder.typicode.com/todos/1')
+			// 	.then(resp => console.log(resp.data))
 
 			switchText()
 		});
